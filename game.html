@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>game</title>
+</head>
+<body>
+    <canvas id="cvs" width="800" height="600" style="border:1px solid black;"></canvas>
+    <script src="game.js"></script>
+    <script>
+        let cvs=document.querySelector("#cvs");//取得canvas物件
+        
+        let ctx=cvs.getContext("2d") //取得對應的context物件
+        
+        //let r1=new Rect(50,50,1,0)//初始化資料
+        //let r2=new Rect(100,100,1,1)
+        let circle=0
+        let plane=new Plane()
+        let ufos=new UFOSystem()
+        let objs=[plane,ufos] //用來裝所有要畫在畫面上的物件
+        let refresh=function(){
+            
+            //更新資料
+            for(let i=0;i<objs.length;i++){
+                let dead=objs[i].update()
+                if(dead){
+                    objs.splice(i,1);
+                    i--
+                }
+            }
+            //清空畫面
+            ctx.fillRect(0,0,cvs.width,cvs.height)
+            //根據新的資料，重新畫過
+            for(let i=0;i<objs.length;i++){
+                objs[i].draw()
+            }
+            circle++
+        }
+        //先載入外部資源
+        let imgs={
+            plane:"plane.png",
+            missile:"missile.png"
+            ,ufo:"ufo.png"
+            ,explosion:"explosion.png"
+        }
+        async function loadImages(){
+            for(let key in imgs){
+                await loadImage(key,imgs[key])
+            }
+            start()
+        }
+        function loadImage(key,src){
+            return  new Promise((resolve)=>{
+                let img=new Image()
+                img.src=src
+                img.addEventListener("load",function(){
+                    console.log(key,"Loaded")
+                    imgs[key]=img
+                    resolve();
+                })
+            })
+        }
+        
+        //啟動遊戲系統
+        function start(){
+            //建立鍵盤控制
+            document.addEventListener("keydown",keydown)
+            document.addEventListener("keyup",keyup)
+            window.setInterval(refresh,10)
+        }
+        let keys={} //用來追蹤那些件被按了
+        function keydown(e){
+            keys[e.code]=true
+            
+        }
+        function keyup(e){
+            delete keys[e.code]
+        }
+        
+        
+        //let img=new Image()
+        //img.src="fire.png"
+        //img.addEventListener("load",function(){
+           // window.setInterval(refresh,10)
+        //})
+         //100HZ
+         loadImages()
+        
+        
+
+    </script>
+    
+</body>
+</html>
